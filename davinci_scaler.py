@@ -15,6 +15,20 @@ logging.basicConfig(
     level=level,
 )
 
+
+def spline_hands(line, search, multiplier):
+    if "%s = {" % search in line:
+        string_start = line.find("%s = {" % search) + len(search) + 5
+        string_end = line.find(',', string_start)
+        value_string = line[string_start:string_end]
+        new_value = str(float(value_string) * multiplier)
+        # endswith .replace('.0', '')
+        logging.info("Converted bezier curve value for %s from %s to %s" % (search, value_string, new_value))
+        return line.replace("%s = { %s," % (search, value_string), "%s = { %s," % (search, new_value), 1)
+    else:
+        return line
+
+
 @click.command()
 @click.option('--input_file', prompt='Input filename', help='The settings file to be read')
 @click.option('--output_file', prompt='Output filename', help='The settings file to be written')
@@ -58,8 +72,12 @@ def scale(input_file, output_file, multiplier):
             keyframe = line[(indentation + 2):line.find(']')]
             converted_keyframe = float(keyframe) * multiplier
             converted_keyframes += 1
-            logging.info("Converted keyframe %s to %s" % (str(keyframe), str(converted_keyframe).replace('.0', '')))
-            line = line.replace("[%s]" % keyframe, "[%s]" % str(converted_keyframe).replace('.0', ''), 1)
+            # new value endswith .replace('.0', '')
+            logging.info("Converted keyframe %s to %s" % (str(keyframe), str(converted_keyframe)))
+            line = line.replace("[%s]" % keyframe, "[%s]" % str(converted_keyframe), 1)
+
+            line = spline_hands(line, "LH", multiplier)
+            line = spline_hands(line, "RH", multiplier)
 
         output.append(line)
 
