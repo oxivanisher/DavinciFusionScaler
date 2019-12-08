@@ -1,3 +1,9 @@
+# Ignore .settings files from Davinci Resolve
+*.settings
+
+# Ignore PyCharm dir
+.idea
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
